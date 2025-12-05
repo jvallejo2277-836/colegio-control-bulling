@@ -1,0 +1,21 @@
+# Backend
+venv/
+__pycache__/
+*.pyc
+
+# Django
+*.sqlite3
+
+# Frontend
+node_modules/
+dist/
+
+# Logs
+*.log
+
+# Sistema
+.DS_Store
+.env
+
+# IDE
+.vscode/
