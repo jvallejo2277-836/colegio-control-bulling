@@ -1,0 +1,326 @@
+/* ---------- BASE ---------- */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #f7f8fa;
+  color: #1f2937;
+}
+
+.app-body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* ---------- LAYOUT ---------- */
+.layout-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-content {
+  padding: 24px 32px;
+}
+
+/* ---------- SIDEBAR ---------- */
+.sidebar {
+  width: 240px;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  padding: 20px 0;
+}
+
+.sidebar-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 12px 20px 4px;
+  text-transform: uppercase;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  text-decoration: none;
+  color: #374151;
+  transition: 0.17s ease;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-item:hover {
+  background: #f3f4f6;
+}
+
+.sidebar-item.active {
+  background: #eef2ff;
+  color: #4338ca;
+  border-left-color: #6366f1;
+  font-weight: 600;
+}
+
+/* ---------- HEADER ---------- */
+.header {
+  height: 60px;
+  padding: 0 24px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 20px;
+  margin-right: 8px;
+}
+
+.system-name {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* ---------- BOTONES ---------- */
+.btn-primary {
+  background: #6366f1;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #4f46e5;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #374151;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+/* ---------- TARJETAS ---------- */
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* ---------- TABLAS ---------- */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.table thead {
+  background: #eef2ff;
+}
+
+.table th {
+  padding: 12px;
+  font-size: 14px;
+  color: #4338ca;
+  text-align: left;
+}
+
+.table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* ---------- TAGS ---------- */
+.tag-active {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tag-inactive {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
+  color: #6b7280; /* gris elegante */
+}
+
+.sidebar-item.active .sidebar-icon {
+  color: #4338ca; /* morado moderno */
+}
+
+/* ========== MODAL ========== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 40;
+}
+
+.modal {
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+  width: 420px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ===== BOTÓN CREAR ===== */
+.create-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  height: 40px;
+  font-size: 14px;
+}
+
+/* Ícono dentro del botón */
+.icon-btn {
+  width: 18px;
+  height: 18px;
+}
+
+/* ------------------------------------------
+   ROLES — Vista profesional (Estilo C)
+------------------------------------------ */
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* CARD */
+.card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid #e5e7eb;
+  transition: background 0.2s;
+}
+
+.card:hover {
+  background: #f9fafb;
+}
+
+/* CARD HEADER */
+.card-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  cursor: pointer;
+  align-items: center;
+}
+
+.card-title {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.card-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.card-badge {
+  background: #eef2ff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #4338ca;
+}
+
+/* CARD BODY */
+.card-body {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* PERSON LIST */
+.person-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.person-item {
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+}
+
+.person-item strong {
+  font-size: 15px;
+}
+
+.person-small {
+  display: flex;
+  gap: 20px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ICONS */
+.icon-md {
+  width: 20px;
+  height: 20px;
+}
+
+.icon-sm {
+  width: 16px;
+  height: 16px;
+}

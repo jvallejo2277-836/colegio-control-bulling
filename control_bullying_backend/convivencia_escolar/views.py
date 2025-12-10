@@ -1,4 +1,6 @@
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from .models import (
     Colegio, Persona, Curso, Matricula,
@@ -6,9 +8,11 @@ from .models import (
     RolPersona, PersonaRol, PersonaRelacion,
     UsuarioPersona
 )
+
 from .serializers import (
     ColegioSerializer, PersonaSerializer, CursoSerializer, MatriculaSerializer,
-    RolPersonaSerializer, PersonaRolSerializer, PersonaRelacionSerializer,
+    RolPersonaSerializer, RolPersonaFullSerializer,
+    PersonaRolSerializer, PersonaRelacionSerializer,
     UsuarioPersonaSerializer
 )
 
@@ -36,6 +40,19 @@ class MatriculaViewSet(viewsets.ModelViewSet):
 class RolPersonaViewSet(viewsets.ModelViewSet):
     queryset = RolPersona.objects.all()
     serializer_class = RolPersonaSerializer
+
+    # -----------------------------
+    # ENDPOINT PERSONALIZADO: /api/roles/full/
+    # -----------------------------
+    @action(detail=False, methods=['get'], url_path='full')
+    def get_full(self, request):
+        """
+        Retorna los roles con todos los datos expandidos
+        (incluye categoría de rol y permite uso en tablas avanzadas del frontend).
+        """
+        roles = self.get_queryset()
+        serializer = RolPersonaFullSerializer(roles, many=True)
+        return Response(serializer.data)
 
 
 class PersonaRolViewSet(viewsets.ModelViewSet):

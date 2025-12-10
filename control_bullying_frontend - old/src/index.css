@@ -1,0 +1,70 @@
+/* === Estilos globales de fondo === */
+body {
+  background-color: #f5f7fa;
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* === CONTENEDOR DEL LOGIN === */
+.login-container {
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+}
+
+/* === TARJETA DEL LOGIN === */
+.login-card {
+  background: white;
+  padding: 35px 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+/* === TÍTULO === */
+.login-title {
+  margin-bottom: 25px;
+  font-size: 22px;
+  color: #333;
+  font-weight: 600;
+}
+
+/* === INPUTS === */
+.login-card input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #d0d0d0;
+  outline: none;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.login-card input:focus {
+  border-color: #006aff;
+  box-shadow: 0 0 4px rgba(0, 106, 255, 0.4);
+}
+
+/* === BOTÓN === */
+.login-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  margin-top: 15px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.login-button:hover {
+  background-color: #0b5ed7;
+}

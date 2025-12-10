@@ -6,8 +6,6 @@ from .models import (
     UsuarioPersona
 )
 from django.contrib.auth.models import User
-
-
 # -----------------------------
 # COLEGIO
 # -----------------------------
@@ -15,8 +13,6 @@ class ColegioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Colegio
         fields = '__all__'
-
-
 # -----------------------------
 # PERSONA
 # -----------------------------
@@ -107,3 +103,55 @@ class UsuarioPersonaSerializer(serializers.ModelSerializer):
     class Meta:
         model = UsuarioPersona
         fields = '__all__'
+
+
+class PersonaInRolSerializer(serializers.ModelSerializer):
+    colegio_nombre = serializers.CharField(source="id_colegio.nombre", read_only=True)
+
+    class Meta:
+        model = Persona
+        fields = [
+            "id_persona",
+            "rut",
+            "nombres",
+            "apellidos",
+            "correo",
+            "telefono",
+            "colegio_nombre",
+            "activo",
+        ]
+
+
+class RolPersonaFullSerializer(serializers.ModelSerializer):
+    categoria = serializers.CharField(source="id_categoria.nombre", read_only=True)
+    personas = serializers.SerializerMethodField()
+    total_personas = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RolPersona
+        fields = [
+            "id_rol",
+            "nombre",
+            "categoria",
+            "descripcion",
+            "activo",
+            "fecha_creacion",
+            "fecha_actualizacion",
+            "fecha_baja",
+            "total_personas",
+            "personas",
+        ]
+
+    def get_total_personas(self, obj):
+        return obj.personas_asignadas.count()
+
+    def get_personas(self, obj):
+        queryset = Persona.objects.filter(
+            roles_asignados__id_rol=obj.id_rol
+        ).order_by(
+            "id_colegio",
+            "rut",
+            "apellidos",
+            "nombres",
+        )
+        return PersonaInRolSerializer(queryset, many=True).data
