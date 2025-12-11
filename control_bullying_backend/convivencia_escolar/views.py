@@ -26,6 +26,15 @@ class PersonaViewSet(viewsets.ModelViewSet):
     queryset = Persona.objects.all()
     serializer_class = PersonaSerializer
 
+    def get_queryset(self):
+        qs = Persona.objects.all()
+
+        colegio_id = self.request.query_params.get("colegio")
+        if colegio_id:
+            qs = qs.filter(id_colegio=colegio_id)
+
+        return qs
+
 
 class CursoViewSet(viewsets.ModelViewSet):
     queryset = Curso.objects.all()

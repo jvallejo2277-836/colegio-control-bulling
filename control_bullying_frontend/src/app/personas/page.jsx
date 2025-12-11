@@ -21,7 +21,14 @@ export default function PersonasPage() {
       if (!res.ok) throw new Error("Error al obtener personas");
 
       const data = await res.json();
-      setPersonas(data);
+
+      const personasFormateadas = data.map((p) => ({
+        ...p,
+        nombre_completo:
+          `${p.nombres} ${p.apellido_paterno || ""} ${p.apellido_materno || ""}`.trim(),
+      }));
+
+      setPersonas(personasFormateadas);
     } catch (err) {
       setError("No se pudieron cargar las personas");
     } finally {
@@ -40,11 +47,11 @@ export default function PersonasPage() {
         <h1 className="page-title">Personas</h1>
 
         <button
-            className="btn-primary create-btn"
-             onClick={() => setOpenModal(true)}
+          className="btn-primary create-btn"
+          onClick={() => setOpenModal(true)}
         >
-        <PlusIcon className="icon-btn" />
-            Crear Persona
+          <PlusIcon className="icon-btn" />
+          Crear Persona
         </button>
       </div>
 
@@ -59,7 +66,7 @@ export default function PersonasPage() {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Nombre</th>
+                <th>Nombre completo</th>
                 <th>Correo</th>
                 <th>Colegio</th>
                 <th>Activo</th>
@@ -70,7 +77,7 @@ export default function PersonasPage() {
               {personas.map((p) => (
                 <tr key={p.id_persona}>
                   <td>{p.id_persona}</td>
-                  <td>{p.nombres} {p.apellidos}</td>
+                  <td>{p.nombre_completo}</td>
                   <td>{p.correo || "-"}</td>
                   <td>{p.id_colegio}</td>
                   <td>
@@ -97,7 +104,8 @@ export default function PersonasPage() {
 /* Modal para crear personas */
 function CrearPersonaModal({ onClose, refresh }) {
   const [nombres, setNombres] = useState("");
-  const [apellidos, setApellidos] = useState("");
+  const [apellidoPaterno, setApellidoPaterno] = useState("");
+  const [apellidoMaterno, setApellidoMaterno] = useState("");
   const [correo, setCorreo] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -114,7 +122,8 @@ function CrearPersonaModal({ onClose, refresh }) {
         },
         body: JSON.stringify({
           nombres,
-          apellidos,
+          apellido_paterno: apellidoPaterno,
+          apellido_materno: apellidoMaterno,
           correo,
           id_colegio: 1,
           consentimiento_datos: false,
@@ -147,12 +156,21 @@ function CrearPersonaModal({ onClose, refresh }) {
             value={nombres}
             onChange={(e) => setNombres(e.target.value)}
           />
+
           <input
             className="input"
-            placeholder="Apellidos"
-            value={apellidos}
-            onChange={(e) => setApellidos(e.target.value)}
+            placeholder="Apellido paterno"
+            value={apellidoPaterno}
+            onChange={(e) => setApellidoPaterno(e.target.value)}
           />
+
+          <input
+            className="input"
+            placeholder="Apellido materno"
+            value={apellidoMaterno}
+            onChange={(e) => setApellidoMaterno(e.target.value)}
+          />
+
           <input
             className="input"
             placeholder="Correo"
@@ -162,8 +180,14 @@ function CrearPersonaModal({ onClose, refresh }) {
         </div>
 
         <div className="modal-footer">
-          <button className="btn-secondary" onClick={onClose}>Cancelar</button>
-          <button className="btn-primary" onClick={crearPersona} disabled={loading}>
+          <button className="btn-secondary" onClick={onClose}>
+            Cancelar
+          </button>
+          <button
+            className="btn-primary"
+            onClick={crearPersona}
+            disabled={loading}
+          >
             {loading ? "Guardando..." : "Guardar"}
           </button>
         </div>

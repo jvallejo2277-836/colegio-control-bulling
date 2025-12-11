@@ -78,7 +78,7 @@ export default function RolesPage() {
                       <li key={p.id_persona} className="person-item">
                         <div>
                           <strong>
-                            {p.nombres} {p.apellidos}
+                            {p.nombre_completo}
                           </strong>
                           <br />
                           Colegio: {p.colegio_nombre}

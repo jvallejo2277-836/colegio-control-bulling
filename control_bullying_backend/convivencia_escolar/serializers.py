@@ -6,43 +6,75 @@ from .models import (
     UsuarioPersona
 )
 from django.contrib.auth.models import User
-# -----------------------------
+
+# ============================================================
+# UTILIDAD — Combina automáticamente los dos apellidos
+# ============================================================
+
+def build_full_lastname(persona):
+    """
+    Retorna apellido paterno + apellido materno
+    o el campo antiguo 'apellidos' si ambos vienen vacíos.
+    """
+    if persona.apellido_paterno and persona.apellido_materno:
+        return f"{persona.apellido_paterno} {persona.apellido_materno}"
+    if persona.apellido_paterno:
+        return persona.apellido_paterno
+    if persona.apellido_materno:
+        return persona.apellido_materno
+    return persona.apellidos or ""
+
+
+# ============================================================
 # COLEGIO
-# -----------------------------
+# ============================================================
+
 class ColegioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Colegio
         fields = '__all__'
-# -----------------------------
+
+
+# ============================================================
 # PERSONA
-# -----------------------------
+# ============================================================
+
 class PersonaSerializer(serializers.ModelSerializer):
+    nombre_completo = serializers.SerializerMethodField()
+
     class Meta:
         model = Persona
         fields = '__all__'
 
+    def get_nombre_completo(self, obj):
+        ap = build_full_lastname(obj)
+        return f"{obj.nombres} {ap}".strip()
 
-# -----------------------------
+
+# ============================================================
 # CURSO
-# -----------------------------
+# ============================================================
+
 class CursoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Curso
         fields = '__all__'
 
 
-# -----------------------------
+# ============================================================
 # MATRÍCULA
-# -----------------------------
+# ============================================================
+
 class MatriculaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Matricula
         fields = '__all__'
 
 
-# -----------------------------
+# ============================================================
 # CATÁLOGOS
-# -----------------------------
+# ============================================================
+
 class CatCategoriaRolSerializer(serializers.ModelSerializer):
     class Meta:
         model = CatCategoriaRol
@@ -61,36 +93,40 @@ class CatEstadoMatriculaSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# -----------------------------
+# ============================================================
 # ROL PERSONA
-# -----------------------------
+# ============================================================
+
 class RolPersonaSerializer(serializers.ModelSerializer):
     class Meta:
         model = RolPersona
         fields = '__all__'
 
 
-# -----------------------------
+# ============================================================
 # ASIGNACIÓN DE ROLES
-# -----------------------------
+# ============================================================
+
 class PersonaRolSerializer(serializers.ModelSerializer):
     class Meta:
         model = PersonaRol
         fields = '__all__'
 
 
-# -----------------------------
+# ============================================================
 # RELACIONES ENTRE PERSONAS
-# -----------------------------
+# ============================================================
+
 class PersonaRelacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PersonaRelacion
         fields = '__all__'
 
 
-# -----------------------------
+# ============================================================
 # USUARIOS DJANGO ↔ PERSONA
-# -----------------------------
+# ============================================================
+
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -105,8 +141,13 @@ class UsuarioPersonaSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+# ============================================================
+# PERSONA REDUCIDA PARA ROLES
+# ============================================================
+
 class PersonaInRolSerializer(serializers.ModelSerializer):
     colegio_nombre = serializers.CharField(source="id_colegio.nombre", read_only=True)
+    nombre_completo = serializers.SerializerMethodField()
 
     class Meta:
         model = Persona
@@ -114,13 +155,23 @@ class PersonaInRolSerializer(serializers.ModelSerializer):
             "id_persona",
             "rut",
             "nombres",
-            "apellidos",
+            "apellido_paterno",
+            "apellido_materno",
+            "nombre_completo",
             "correo",
             "telefono",
             "colegio_nombre",
             "activo",
         ]
 
+    def get_nombre_completo(self, obj):
+        ap = build_full_lastname(obj)
+        return f"{obj.nombres} {ap}".strip()
+
+
+# ============================================================
+# ROL PERSONA — FULL
+# ============================================================
 
 class RolPersonaFullSerializer(serializers.ModelSerializer):
     categoria = serializers.CharField(source="id_categoria.nombre", read_only=True)
@@ -151,7 +202,9 @@ class RolPersonaFullSerializer(serializers.ModelSerializer):
         ).order_by(
             "id_colegio",
             "rut",
-            "apellidos",
+            "apellido_paterno",
+            "apellido_materno",
             "nombres",
         )
+
         return PersonaInRolSerializer(queryset, many=True).data

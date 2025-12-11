@@ -14,7 +14,6 @@ export default function Login() {
 
     try {
       const res = await fetch("http://127.0.0.1:8000/api/login/", {
-
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -27,12 +26,11 @@ export default function Login() {
 
       const data = await res.json();
 
-      // Guardamos el JWT
       localStorage.setItem("token", data.access);
       localStorage.setItem("refresh", data.refresh);
+      localStorage.setItem("userData", JSON.stringify(data.user));
 
-      // Redirigimos al dashboard
-      router.push("/dashboard");
+      router.push("/");
     } catch (err) {
       console.error(err);
       setError("Error de conexión con el servidor");
@@ -72,7 +70,6 @@ export default function Login() {
   );
 }
 
-// 🎨 ESTILOS (limpios y centrados)
 const styles = {
   container: {
     display: "flex",

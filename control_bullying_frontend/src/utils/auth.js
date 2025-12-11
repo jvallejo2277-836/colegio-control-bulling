@@ -1,25 +1,69 @@
-export function isAuthenticated() {
-  if (typeof window === "undefined") return false;
+// src/utils/auth.js
 
-  const token = localStorage.getItem("token");
+// Decodifica un JWT
+function decodeJWT(token) {
+  try {
+    const payload = token.split(".")[1];
+    return JSON.parse(atob(payload));
+  } catch (e) {
+    return null;
+  }
+}
 
-  // No hay token → no autenticado
-  if (!token) return false;
+// Revisa si expiró
+function isExpired(token) {
+  const payload = decodeJWT(token);
+  if (!payload || !payload.exp) return true;
+
+  const now = Math.floor(Date.now() / 1000);
+  return payload.exp < now;
+}
+
+// -------------------------------
+// INTENTAR REFRESCAR TOKEN
+// -------------------------------
+async function tryRefresh() {
+  const refresh = localStorage.getItem("refresh");
+  if (!refresh) return false;
 
   try {
-    // Decodificar el payload del JWT
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const now = Math.floor(Date.now() / 1000);
+    const res = await fetch("http://127.0.0.1:8000/api/token/refresh/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh }),
+    });
 
-    // Token expirado
-    if (payload.exp && payload.exp < now) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("refresh");
-      return false;
-    }
+    if (!res.ok) return false;
 
+    const data = await res.json();
+    localStorage.setItem("token", data.access);
     return true;
   } catch (e) {
     return false;
   }
+}
+
+// -------------------------------
+// FUNCIÓN PRINCIPAL
+// -------------------------------
+export async function isAuthenticated() {
+  if (typeof window === "undefined") return false;
+
+  let token = localStorage.getItem("token");
+
+  // No hay token → no autenticado
+  if (!token) return false;
+
+  // Token válido → OK
+  if (!isExpired(token)) return true;
+
+  // Token expirado → intentar refresh
+  const refreshed = await tryRefresh();
+
+  if (refreshed) return true;
+
+  // Nada funcionó → cerrar sesión
+  localStorage.removeItem("token");
+  localStorage.removeItem("refresh");
+  return false;
 }

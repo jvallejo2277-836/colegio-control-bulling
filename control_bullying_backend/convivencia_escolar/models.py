@@ -88,6 +88,8 @@ class Persona(models.Model):
     rut = models.CharField(max_length=15, unique=True, blank=True, null=True)
     nombres = models.CharField(max_length=100)
     apellidos = models.CharField(max_length=100)
+    apellido_paterno = models.CharField(max_length=60, blank=True, null=True)
+    apellido_materno = models.CharField(max_length=60, blank=True, null=True)
     correo = models.CharField(max_length=120, blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     email_alt = models.CharField(max_length=150, blank=True, null=True)
