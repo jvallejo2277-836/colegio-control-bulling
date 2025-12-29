@@ -27,13 +27,29 @@ class PersonaViewSet(viewsets.ModelViewSet):
     serializer_class = PersonaSerializer
 
     def get_queryset(self):
+        """
+        Filtro por colegio (multi-tenant).
+        - Soporta ?id_colegio= (frontend actual)
+        - Soporta ?colegio= (compatibilidad)
+        - Si NO viene ningún parámetro => devuelve vacío para evitar fuga de datos.
+        """
         qs = Persona.objects.all()
 
-        colegio_id = self.request.query_params.get("colegio")
-        if colegio_id:
-            qs = qs.filter(id_colegio=colegio_id)
+        # Nuevo (frontend): ?id_colegio=2
+        id_colegio = self.request.query_params.get("id_colegio")
 
-        return qs
+        # Compatibilidad (antiguo): ?colegio=2
+        colegio_id = self.request.query_params.get("colegio")
+
+        # Preferimos id_colegio si viene
+        colegio_filtro = id_colegio or colegio_id
+
+        if colegio_filtro:
+            qs = qs.filter(id_colegio=colegio_filtro).order_by("id_persona")
+            return qs
+
+        # Blindaje: si no especifican colegio, no devolvemos nada
+        return qs.none()
 
 
 class CursoViewSet(viewsets.ModelViewSet):
