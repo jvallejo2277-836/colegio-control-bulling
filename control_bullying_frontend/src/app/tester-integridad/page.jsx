@@ -1,27 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { apiFetch } from "@/services/api";
 
 export default function TesterIntegridad() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // ---------------------------------------
-  // LISTA DE PRUEBAS DE INTEGRIDAD
-  // ---------------------------------------
   const pruebas = [
-    // PRUEBA 1
     {
       id: 1,
       nombre: "Crear persona SIN colegio",
       ejecutar: async () => {
-        const token = localStorage.getItem("token");
-        const res = await fetch("http://127.0.0.1:8000/api/personas/", {
+        return await apiFetch("/personas/", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify({
             nombres: "Juan",
             apellidos: "Pérez",
@@ -29,23 +21,14 @@ export default function TesterIntegridad() {
             id_colegio: null,
           }),
         });
-
-        return await res.json();
       },
     },
-
-    // PRUEBA 2
     {
       id: 2,
       nombre: "Crear persona con colegio inexistente",
       ejecutar: async () => {
-        const token = localStorage.getItem("token");
-        const res = await fetch("http://127.0.0.1:8000/api/personas/", {
+        return await apiFetch("/personas/", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify({
             nombres: "Carlos",
             apellidos: "Gómez",
@@ -53,56 +36,49 @@ export default function TesterIntegridad() {
             id_colegio: 9999,
           }),
         });
-
-        return await res.json();
       },
     },
-
-    // PRUEBA 3
     {
       id: 3,
       nombre: "Eliminar colegio con personas asociadas",
       ejecutar: async () => {
-        const token = localStorage.getItem("token");
-
-        const res = await fetch("http://127.0.0.1:8000/api/colegios/1/", {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        // Siempre leemos como texto
-        const text = await res.text();
-
-        // Caso: Django devuelve HTML por error de FK
-        if (text.startsWith("<")) {
-          return {
-            error: "HTML recibido (restricción FK activada)",
-            detalle: "No se puede eliminar colegio con personas asociadas.",
-          };
-        }
-
-        // Si se borra (204), entonces está mal
-        if (res.status === 204) {
-          return {
-            error: "ERROR GRAVE: Se eliminó el colegio, pero NO debía permitirse",
-          };
-        }
-
-        // Intentamos parsear JSON
+        // apiFetch ya maneja headers y parsea JSON si todo ok,
+        // pero un DELETE puede devolver 204 (sin body), así que lo tratamos aparte.
         try {
-          return JSON.parse(text);
+          // usamos fetch manual pero con el token correcto
+          const token = localStorage.getItem("access");
+          const res = await fetch("http://127.0.0.1:8000/api/colegios/1/", {
+            method: "DELETE",
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+
+          if (res.status === 204) {
+            return {
+              error: "ERROR GRAVE: Se eliminó el colegio, pero NO debía permitirse",
+            };
+          }
+
+          const text = await res.text();
+
+          if (text.startsWith("<")) {
+            return {
+              error: "HTML recibido (restricción FK activada)",
+              detalle: "No se puede eliminar colegio con personas asociadas.",
+            };
+          }
+
+          try {
+            return JSON.parse(text);
+          } catch {
+            return { error: "Respuesta no interpretable", raw: text };
+          }
         } catch (e) {
-          return { error: "Respuesta no interpretable", raw: text };
+          return { error: String(e) };
         }
       },
     },
   ];
 
-  // ---------------------------------------
-  // EJECUTAR TODAS LAS PRUEBAS
-  // ---------------------------------------
   const ejecutarTodas = async () => {
     setLoading(true);
     const nuevosResultados = [];
@@ -110,16 +86,12 @@ export default function TesterIntegridad() {
     for (const prueba of pruebas) {
       try {
         const resultado = await prueba.ejecutar();
-        nuevosResultados.push({
-          id: prueba.id,
-          nombre: prueba.nombre,
-          resultado,
-        });
+        nuevosResultados.push({ id: prueba.id, nombre: prueba.nombre, resultado });
       } catch (error) {
         nuevosResultados.push({
           id: prueba.id,
           nombre: prueba.nombre,
-          resultado: error.toString(),
+          resultado: error?.message || error.toString(),
         });
       }
     }
@@ -128,9 +100,6 @@ export default function TesterIntegridad() {
     setLoading(false);
   };
 
-  // ---------------------------------------
-  // UI
-  // ---------------------------------------
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>🧪 Tester de Integridad del Modelo</h1>
@@ -143,9 +112,7 @@ export default function TesterIntegridad() {
         {results.map((r) => (
           <div key={r.id} style={styles.card}>
             <h3>{r.nombre}</h3>
-            <pre style={styles.pre}>
-              {JSON.stringify(r.resultado, null, 2)}
-            </pre>
+            <pre style={styles.pre}>{JSON.stringify(r.resultado, null, 2)}</pre>
           </div>
         ))}
       </div>
@@ -153,17 +120,9 @@ export default function TesterIntegridad() {
   );
 }
 
-// ---------------------------------------
-// ESTILOS
-// ---------------------------------------
 const styles = {
-  container: {
-    padding: 30,
-  },
-  title: {
-    fontSize: 28,
-    marginBottom: 20,
-  },
+  container: { padding: 30 },
+  title: { fontSize: 28, marginBottom: 20 },
   button: {
     padding: "12px 24px",
     background: "#0070f3",

@@ -284,3 +284,39 @@ class UsuarioPersona(models.Model):
 
     def __str__(self):
         return f"{self.user.username} ↔ {self.persona}"
+
+
+# ✅ NUEVO: tabla de asignación multi-colegio/rol
+class PersonaColegioRol(models.Model):
+    id = models.AutoField(primary_key=True)
+
+    id_persona = models.ForeignKey(
+        Persona,
+        on_delete=models.PROTECT,
+        db_column='id_persona',
+        related_name='colegios_roles',
+    )
+
+    id_colegio = models.ForeignKey(
+        Colegio,
+        on_delete=models.PROTECT,
+        db_column='id_colegio',
+        related_name='personas_roles',
+    )
+
+    id_rol = models.ForeignKey(
+        RolPersona,
+        on_delete=models.PROTECT,
+        db_column='id_rol',
+        related_name='personas_colegios',
+    )
+
+    activo = models.BooleanField()
+    fecha_asignacion = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'persona_colegio_rol'
+
+    def __str__(self):
+        return f"Persona {self.id_persona_id} - Colegio {self.id_colegio_id} - Rol {self.id_rol_id}"

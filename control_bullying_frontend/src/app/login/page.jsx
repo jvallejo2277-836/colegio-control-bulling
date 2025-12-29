@@ -1,110 +1,198 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { saveAuthData } from "@/utils/auth";
 
-export default function Login() {
+const API_BASE = "http://127.0.0.1:8000";
+
+export default function LoginPage() {
   const router = useRouter();
+
+  // credenciales
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
+  // estado UI
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async (e) => {
+  // etapa selección colegio (según tu backend)
+  const [requiresSchool, setRequiresSchool] = useState(false);
+  const [schools, setSchools] = useState([]);
+  const [rolesBySchool, setRolesBySchool] = useState({});
+  const [selectedSchool, setSelectedSchool] = useState("");
+
+  // (opcional) guardar user recibido en etapa 1
+  const [tempUser, setTempUser] = useState(null);
+
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/login/", {
+      const body = { username, password };
+
+      // ✅ ETAPA 2: mandamos id_colegio
+      if (requiresSchool) {
+        if (!selectedSchool) {
+          setError("Debe seleccionar un colegio.");
+          setLoading(false);
+          return;
+        }
+        body.id_colegio = selectedSchool;
+      }
+
+      const res = await fetch(`${API_BASE}/api/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify(body),
       });
-
-      if (!res.ok) {
-        setError("Usuario o contraseña incorrectos");
-        return;
-      }
 
       const data = await res.json();
 
-      localStorage.setItem("token", data.access);
-      localStorage.setItem("refresh", data.refresh);
-      localStorage.setItem("userData", JSON.stringify(data.user));
+      if (!res.ok) {
+        setError(data.detail || "Error al iniciar sesión");
+        setLoading(false);
+        return;
+      }
 
-      router.push("/");
+      // -----------------------------------------
+      // ✅ RESPUESTA ETAPA 1: requiere colegio
+      // -----------------------------------------
+      if (data.requires_school_selection) {
+        const schoolsList = data.schools || [];
+        const rolesMap = data.rolesBySchool || {};
+        const userObj = data.user || null;
+
+        setRequiresSchool(true);
+        setSchools(schoolsList);
+        setRolesBySchool(rolesMap);
+        setTempUser(userObj);
+
+        // Guardamos lista de colegios para el resto de la app
+        try {
+          localStorage.setItem("schools", JSON.stringify(schoolsList));
+        } catch {}
+
+        setLoading(false);
+        return;
+      }
+
+      // -----------------------------------------
+      // ✅ RESPUESTA ETAPA 2: login completo (tokens)
+      // -----------------------------------------
+      // Aquí tu backend ya debería devolver access/refresh (o equivalente)
+      // Tu helper saveAuthData debe dejarlos en localStorage.
+      saveAuthData(data);
+
+      // Guardar colegio activo seleccionado (el contexto del sistema)
+      if (selectedSchool) {
+        localStorage.setItem("activeSchoolId", String(selectedSchool));
+      }
+
+      // Asegurar que schools quede guardado (por si no estaba)
+      if (schools && schools.length > 0) {
+        localStorage.setItem("schools", JSON.stringify(schools));
+      }
+
+      // Guardar user si viene en etapa 2; si no, usar tempUser
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      } else if (tempUser) {
+        localStorage.setItem("user", JSON.stringify(tempUser));
+      }
+
+      router.push("/dashboard");
     } catch (err) {
-      console.error(err);
       setError("Error de conexión con el servidor");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Inicio de Sesión</h2>
+    <div className="login-wrapper">
+      <div className="login-card">
+        <h1 className="login-title">Sistema de Convivencia Escolar</h1>
 
-        {error && <p style={styles.error}>{error}</p>}
+        {!requiresSchool && <p className="login-subtitle">Inicio de sesión</p>}
 
-        <form onSubmit={handleLogin} style={styles.form}>
-          <input
-            style={styles.input}
-            type="text"
-            placeholder="Usuario"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
+        {requiresSchool && (
+          <p className="login-subtitle">
+            Seleccione el colegio con el que desea trabajar
+          </p>
+        )}
 
-          <input
-            style={styles.input}
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        {error && <div className="login-error">{error}</div>}
 
-          <button style={styles.button} type="submit">
-            Ingresar
+        <form onSubmit={handleSubmit} className="login-form">
+          {/* -------------------------
+              ETAPA 1: CREDENCIALES
+          ------------------------- */}
+          {!requiresSchool && (
+            <>
+              <div className="form-group">
+                <label>Usuario</label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  autoComplete="username"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Contraseña</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
+            </>
+          )}
+
+          {/* -------------------------
+              ETAPA 2: SELECCIÓN COLEGIO
+          ------------------------- */}
+          {requiresSchool && (
+            <div className="form-group">
+              <label>Colegio</label>
+              <select
+                value={selectedSchool}
+                onChange={(e) => setSelectedSchool(e.target.value)}
+                required
+              >
+                <option value="">-- Seleccione --</option>
+                {schools.map((c) => (
+                  <option key={String(c.id)} value={String(c.id)}>
+                    {c.nombre}
+                  </option>
+                ))}
+              </select>
+
+              {selectedSchool && rolesBySchool[String(selectedSchool)] && (
+                <small style={{ marginTop: 6, display: "block", color: "#666" }}>
+                  Rol: {rolesBySchool[String(selectedSchool)].join(", ")}
+                </small>
+              )}
+            </div>
+          )}
+
+          <button type="submit" className="btn-login" disabled={loading}>
+            {loading
+              ? "Procesando..."
+              : requiresSchool
+              ? "Ingresar al colegio"
+              : "Ingresar"}
           </button>
         </form>
       </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    display: "flex",
-    height: "100vh",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#f5f6fa",
-  },
-  card: {
-    width: 360,
-    background: "#fff",
-    padding: 30,
-    borderRadius: 12,
-    boxShadow: "0 4px 18px rgba(0,0,0,0.1)",
-  },
-  title: {
-    textAlign: "center",
-    marginBottom: 20,
-    fontSize: 22,
-    fontWeight: "bold",
-  },
-  form: { display: "flex", flexDirection: "column", gap: 14 },
-  input: {
-    padding: 12,
-    borderRadius: 6,
-    border: "1px solid #ccc",
-  },
-  button: {
-    padding: 12,
-    background: "#0070f3",
-    border: "none",
-    color: "white",
-    borderRadius: 6,
-    cursor: "pointer",
-    fontWeight: "bold",
-  },
-  error: { color: "red", textAlign: "center", marginBottom: 10 },
-};

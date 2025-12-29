@@ -18,6 +18,10 @@ from convivencia_escolar.views import (
     UsuarioPersonaViewSet,
 )
 
+# 👇 AGREGAR ESTA IMPORTACIÓN
+from convivencia_escolar.views_auth import login_view, ProfileDetails
+
+
 # Router principal
 router = routers.DefaultRouter()
 router.register(r'colegios', ColegioViewSet)
@@ -36,7 +40,11 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    # Rutas manuales (login REST)
+    # LOGIN y PERFIL
+    path('api/login/', login_view, name='login'),
+    path('api/profile/', ProfileDetails.as_view(), name='profile'),
+
+    # Rutas manuales (otras rutas de convivencia_escolar)
     path('api/', include('convivencia_escolar.urls')),
 
     # Rutas automáticas (Viewsets)

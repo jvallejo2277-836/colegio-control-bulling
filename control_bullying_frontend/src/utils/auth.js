@@ -1,69 +1,66 @@
 // src/utils/auth.js
 
-// Decodifica un JWT
-function decodeJWT(token) {
+// ===============================
+// TOKEN
+// ===============================
+export function getToken() {
+  return localStorage.getItem("access");
+}
+
+export function isAuthenticated() {
+  return !!localStorage.getItem("access");
+}
+
+// ===============================
+// USER
+// ===============================
+export function getUser() {
   try {
-    const payload = token.split(".")[1];
-    return JSON.parse(atob(payload));
+    const user = localStorage.getItem("user");
+    if (!user || user === "undefined") return null;
+    return JSON.parse(user);
   } catch (e) {
+    console.error("Error parsing user from localStorage", e);
     return null;
   }
 }
 
-// Revisa si expiró
-function isExpired(token) {
-  const payload = decodeJWT(token);
-  if (!payload || !payload.exp) return true;
-
-  const now = Math.floor(Date.now() / 1000);
-  return payload.exp < now;
+// ===============================
+// COLEGIO ACTIVO
+// (fijo por sesión)
+// ===============================
+export function getActiveSchoolId() {
+  const user = getUser();
+  return user?.id_colegio ?? null;
 }
 
-// -------------------------------
-// INTENTAR REFRESCAR TOKEN
-// -------------------------------
-async function tryRefresh() {
-  const refresh = localStorage.getItem("refresh");
-  if (!refresh) return false;
+// ===============================
+// ROLES
+// ===============================
+export function getRoles() {
+  const user = getUser();
+  return user?.roles ?? [];
+}
 
-  try {
-    const res = await fetch("http://127.0.0.1:8000/api/token/refresh/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh }),
-    });
+// ===============================
+// GUARDAR AUTH DATA
+// ===============================
+export function saveAuthData(data) {
+  // tokens
+  if (data.access) localStorage.setItem("access", data.access);
+  if (data.refresh) localStorage.setItem("refresh", data.refresh);
 
-    if (!res.ok) return false;
-
-    const data = await res.json();
-    localStorage.setItem("token", data.access);
-    return true;
-  } catch (e) {
-    return false;
+  // user (incluye id_colegio, colegio_nombre, roles)
+  if (data.user) {
+    localStorage.setItem("user", JSON.stringify(data.user));
   }
 }
 
-// -------------------------------
-// FUNCIÓN PRINCIPAL
-// -------------------------------
-export async function isAuthenticated() {
-  if (typeof window === "undefined") return false;
-
-  let token = localStorage.getItem("token");
-
-  // No hay token → no autenticado
-  if (!token) return false;
-
-  // Token válido → OK
-  if (!isExpired(token)) return true;
-
-  // Token expirado → intentar refresh
-  const refreshed = await tryRefresh();
-
-  if (refreshed) return true;
-
-  // Nada funcionó → cerrar sesión
-  localStorage.removeItem("token");
+// ===============================
+// LOGOUT
+// ===============================
+export function logout() {
+  localStorage.removeItem("access");
   localStorage.removeItem("refresh");
-  return false;
+  localStorage.removeItem("user");
 }
