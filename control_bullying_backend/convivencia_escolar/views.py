@@ -27,29 +27,11 @@ class PersonaViewSet(viewsets.ModelViewSet):
     serializer_class = PersonaSerializer
 
     def get_queryset(self):
-        """
-        Filtro por colegio (multi-tenant).
-        - Soporta ?id_colegio= (frontend actual)
-        - Soporta ?colegio= (compatibilidad)
-        - Si NO viene ningún parámetro => devuelve vacío para evitar fuga de datos.
-        """
         qs = Persona.objects.all()
-
-        # Nuevo (frontend): ?id_colegio=2
-        id_colegio = self.request.query_params.get("id_colegio")
-
-        # Compatibilidad (antiguo): ?colegio=2
-        colegio_id = self.request.query_params.get("colegio")
-
-        # Preferimos id_colegio si viene
-        colegio_filtro = id_colegio or colegio_id
-
-        if colegio_filtro:
-            qs = qs.filter(id_colegio=colegio_filtro).order_by("id_persona")
-            return qs
-
-        # Blindaje: si no especifican colegio, no devolvemos nada
-        return qs.none()
+        colegio_id = self.request.query_params.get("id_colegio") or self.request.query_params.get("colegio")
+        if not colegio_id:
+            return qs.none()
+        return qs.filter(id_colegio=colegio_id)
 
 
 class CursoViewSet(viewsets.ModelViewSet):
@@ -72,11 +54,17 @@ class RolPersonaViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='full')
     def get_full(self, request):
         """
-        Retorna los roles con todos los datos expandidos
-        (incluye categoría de rol y permite uso en tablas avanzadas del frontend).
+        Retorna los roles con todos los datos expandidos,
+        filtrando las personas por id_colegio si se entrega.
         """
+        colegio_id = request.query_params.get("id_colegio") or request.query_params.get("colegio")
+
         roles = self.get_queryset()
-        serializer = RolPersonaFullSerializer(roles, many=True)
+        serializer = RolPersonaFullSerializer(
+            roles,
+            many=True,
+            context={"request": request, "id_colegio": colegio_id}
+        )
         return Response(serializer.data)
 
 
