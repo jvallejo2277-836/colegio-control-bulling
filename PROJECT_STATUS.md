@@ -1,78 +1,89 @@
-\# Proyecto Antibullying - Estado del Proyecto (Checkpoint)
+# Proyecto Antibullying – Estado del Proyecto (Checkpoint)
 
+## 1. Estado actual (funciona)
 
+- Backend Django corriendo en: http://127.0.0.1:8000/
+- Frontend Next.js con menú y pantallas MVP:
+  - Personas (listado OK)
+  - Roles del Sistema (listado OK)
+  - Relaciones Persona (listado OK)
+  - Tester de Integridad (pantalla OK, pruebas básicas)
 
-\## Estado actual (funciona)
+---
 
-\- Backend Django corriendo en: http://127.0.0.1:8000/
+## 2. Decisiones arquitectónicas cerradas
 
-\- Frontend Next.js con menú y pantallas MVP:
+- Modelo pragmático:
+  - `persona` pertenece a un colegio (`persona.id_colegio`)
+  - Personas pueden repetirse en otro colegio si fuera necesario (controlado)
+- BD MySQL con FK / UNIQUE / RESTRICT
+  - Se evitan triggers y stored procedures por portabilidad
+- Para `persona_relacion`:
+  - Eliminado UNIQUE redundante `uq_relacion (id_persona,id_persona_rel)`
+  - Se mantiene UNIQUE correcto  
+    `uq_persona_relacion (id_persona,id_tipo_relacion,id_persona_rel)`
+  - FK:
+    `persona_relacion.id_tipo_relacion -> cat_tipo_relacion.id_tipo_relacion`
 
-&nbsp; - Personas (listado OK)
+---
 
-&nbsp; - Roles del Sistema (listado OK)
+## 3. Decisiones de UX / Flujo de Usuario (CERRADAS)
 
-&nbsp; - Relaciones Persona (listado OK)
+- El **colegio activo se define SOLO en el login**
+- El colegio activo:
+  - gobierna toda la sesión
+  - se muestra en la UI como referencia
+- Para cambiar de colegio:
+  - logout obligatorio
+  - nuevo login
+- No se usará selector de colegio persistente en header
+- Se evita ambigüedad multi-colegio durante una sesión
 
-&nbsp; - Tester de Integridad (pantalla OK, pruebas básicas)
+---
 
+## 4. Criterios de diseño del sistema (reglas del proyecto)
 
+- Backend es la **fuente de verdad**
+- Validaciones de negocio:
+  - siempre en Django (serializers / services)
+  - nunca solo en frontend
+- Evitar lógica compleja en BD
+- Preferir claridad y trazabilidad sobre optimización prematura
+- Modelo pensado para:
+  - mantenibilidad
+  - onboarding de nuevos desarrolladores
 
-\## Decisiones arquitectónicas cerradas
+---
 
-\- Modelo pragmático: `persona` pertenece a un colegio (`persona.id\_colegio`).
+## 5. Pendiente inmediato (próximos 3 pasos)
 
-&nbsp; - Personas pueden repetirse en otro colegio si fuera necesario (controlado).
+1) Implementar validaciones de negocio en Django para `persona_relacion` (serializer):
+   - no self-relation
+   - mismo colegio entre ambas personas (validación por código)
 
-\- BD MySQL con FK/UNIQUE/RESTRICT; evitamos triggers y SP por portabilidad.
+2) Mejorar Tester de Integridad:
+   - endpoint `POST /api/tester/run`
+   - batería de pruebas con resultado PASS / FAIL
 
-\- Para `persona\_relacion`:
+3) CRUD real (create / edit / disable) para:
+   - Relaciones Persona
+   - luego Matrículas
 
-&nbsp; - Se eliminó UNIQUE redundante `uq\_relacion (id\_persona,id\_persona\_rel)`
+---
 
-&nbsp; - Se mantiene UNIQUE correcto `uq\_persona\_relacion (id\_persona,id\_tipo\_relacion,id\_persona\_rel)`
+## 6. Comandos para levantar
 
-&nbsp; - Se agregó FK: `persona\_relacion.id\_tipo\_relacion -> cat\_tipo\_relacion.id\_tipo\_relacion`
+### Backend
+- Activar venv
+- `python manage.py runserver`
 
+### Frontend
+- `npm run dev`
 
+---
 
-\## Pendiente inmediato (próximos 3 pasos)
+## 7. Notas operativas
 
-1\) Implementar validaciones de negocio en Django para `persona\_relacion` (serializer):
-
-&nbsp;  - no self-relation
-
-&nbsp;  - mismo colegio entre ambas personas (validación por código)
-
-2\) Mejorar Tester de Integridad:
-
-&nbsp;  - endpoint `POST /api/tester/run` que ejecute batería de pruebas (PASS/FAIL)
-
-3\) CRUD real (create/edit/disable) para Relaciones Persona y luego Matrículas
-
-
-
-\## Comandos para levantar
-
-\### Backend
-
-\- Activar venv y correr:
-
-&nbsp; - `python manage.py runserver`
-
-
-
-\### Frontend
-
-\- `npm run dev`
-
-
-
-\## Notas
-
-\- El colegio activo se muestra en UI (Colegio activo ID: 1).
-
-\- Hay datos demo cargados para mostrar MVP.
-
-
-
+- El colegio activo se muestra en UI (ejemplo: Colegio activo ID: 1)
+- Hay datos demo cargados para mostrar MVP
+- Este archivo es la referencia oficial del estado del proyecto
