@@ -150,15 +150,42 @@ No se implementan “mega-testers” mezclando dominios.
 - Hay datos demo cargados para mostrar MVP
 - Este archivo es la **referencia oficial del estado del proyecto**
 
-## 10. Regla de trabajo (calidad / cero errores humanos)
-- Entregables de implementación se entregan como **ARCHIVOS COMPLETOS** (no fragmentos).
-- Objetivo: evitar errores por copia/pega parcial, omisiones o diferencias de contexto.
-- Cuando se requiera modificar un archivo existente, se pedirá/subirá el archivo actual y se devolverá el archivo completo actualizado.
+---
 
-## 11. Regla de implementación (prevención de errores humanos)
+## 10. Autenticación y contexto de sesión (DECISIÓN CERRADA)
+
+- El backend utiliza **JWT con SimpleJWT** para autenticación.
+- El JWT identifica al usuario (**identidad**).
+- El **colegio activo NO viaja en el token**.
+- El colegio activo se gestiona en backend mediante un **contexto de usuario persistido** (`UsuarioContexto`).
+- El backend es la **fuente de verdad** del colegio activo.
+
+### Modo compatibilidad (temporal)
+- Mientras el frontend migra:
+  - Si existe colegio activo en backend → se utiliza ese.
+  - Si NO existe → se acepta `?id_colegio=` como fallback.
+- Este modo es **temporal y controlado**.
+- Objetivo: no romper pantallas existentes mientras se refactoriza con orden.
+
+---
+
+## 11. Regla de trabajo – prevención de errores humanos (OBLIGATORIA)
+
 - Toda modificación de código se entrega como **ARCHIVO COMPLETO**.
 - No se entregan fragmentos ni instrucciones parciales para copiar/pegar.
-- Si se requiere modificar un archivo existente, el archivo actual se sube y se devuelve **completo y listo para reemplazar**.
-- Objetivo: evitar errores de integración, omisiones involuntarias y diferencias de contexto.
+- Si se requiere modificar un archivo existente:
+  - el archivo actual se sube
+  - se devuelve **completo y listo para reemplazar**.
+- Objetivo:
+  - evitar errores de integración
+  - evitar omisiones involuntarias
+  - asegurar trazabilidad y consistencia del proyecto
 
+---
 
+### Changelog
+- **2026-01-07**
+  - Confirmada autenticación JWT con SimpleJWT.
+  - Incorporado concepto de colegio activo backend-driven.
+  - Definido modo compatibilidad para transición sin quiebre.
+  - Formalizada regla de entrega por archivos completos.
