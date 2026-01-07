@@ -149,3 +149,16 @@ No se implementan “mega-testers” mezclando dominios.
 - El colegio activo se muestra en UI (ejemplo: Colegio activo ID: 1)
 - Hay datos demo cargados para mostrar MVP
 - Este archivo es la **referencia oficial del estado del proyecto**
+
+## 10. Regla de trabajo (calidad / cero errores humanos)
+- Entregables de implementación se entregan como **ARCHIVOS COMPLETOS** (no fragmentos).
+- Objetivo: evitar errores por copia/pega parcial, omisiones o diferencias de contexto.
+- Cuando se requiera modificar un archivo existente, se pedirá/subirá el archivo actual y se devolverá el archivo completo actualizado.
+
+## 11. Regla de implementación (prevención de errores humanos)
+- Toda modificación de código se entrega como **ARCHIVO COMPLETO**.
+- No se entregan fragmentos ni instrucciones parciales para copiar/pegar.
+- Si se requiere modificar un archivo existente, el archivo actual se sube y se devuelve **completo y listo para reemplazar**.
+- Objetivo: evitar errores de integración, omisiones involuntarias y diferencias de contexto.
+
+
