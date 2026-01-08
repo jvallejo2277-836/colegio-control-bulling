@@ -189,3 +189,5 @@ No se implementan “mega-testers” mezclando dominios.
   - Incorporado concepto de colegio activo backend-driven.
   - Definido modo compatibilidad para transición sin quiebre.
   - Formalizada regla de entrega por archivos completos.
+###
+### ✅ DB-first: si una tabla existe en BD pero no hay modelo catálogo en Django, se trabaja con IntegerField(db_column=...) + lookups por join/query, y recién al final se convierte a FK.
