@@ -229,23 +229,27 @@ class Matricula(models.Model):
 
     def __str__(self):
         return f"{self.id_persona} - {self.id_curso} ({self.anio})"
-
+    
 
 class PersonaRelacion(models.Model):
     id_persona_relacion = models.AutoField(primary_key=True)
+
     id_persona = models.ForeignKey(
         Persona,
         on_delete=models.PROTECT,
         db_column='id_persona',
         related_name='relaciones',
     )
-    tipo_relacion = models.CharField(max_length=50)
+
+    id_tipo_relacion = models.IntegerField(db_column='id_tipo_relacion')
+
     id_persona_rel = models.ForeignKey(
         Persona,
         on_delete=models.PROTECT,
         db_column='id_persona_rel',
         related_name='relaciones_inversas',
     )
+
     prioridad_contacto = models.IntegerField()
     observaciones = models.CharField(max_length=255, blank=True, null=True)
     fecha_creacion = models.DateTimeField()
@@ -257,7 +261,7 @@ class PersonaRelacion(models.Model):
         db_table = 'persona_relacion'
 
     def __str__(self):
-        return f"{self.id_persona} → {self.id_persona_rel} ({self.tipo_relacion})"
+        return f"{self.id_persona_id} → {self.id_persona_rel_id} (tipo={self.id_tipo_relacion})"
 
 
 class UsuarioPersona(models.Model):

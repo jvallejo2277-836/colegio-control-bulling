@@ -12,7 +12,8 @@ from .models import (
 from .serializers import (
     ColegioSerializer, PersonaSerializer, CursoSerializer, MatriculaSerializer,
     RolPersonaSerializer, RolPersonaFullSerializer,
-    PersonaRolSerializer, PersonaRelacionSerializer,
+    PersonaRolSerializer, PersonaRelacionSerializer, 
+    PersonaRelacionReadSerializer,
     UsuarioPersonaSerializer
 )
 
@@ -73,10 +74,32 @@ class PersonaRolViewSet(viewsets.ModelViewSet):
     serializer_class = PersonaRolSerializer
 
 
-class PersonaRelacionViewSet(viewsets.ModelViewSet):
+class PersonaRelacionViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = PersonaRelacion.objects.all()
-    serializer_class = PersonaRelacionSerializer
+    serializer_class = PersonaRelacionReadSerializer
 
+    def get_queryset(self):
+        qs = PersonaRelacion.objects.select_related(
+            "id_persona",
+            "id_persona_rel",
+        )
+
+        colegio_id = (
+            self.request.query_params.get("id_colegio")
+            or self.request.query_params.get("colegio")
+        )
+        persona_id = self.request.query_params.get("id_persona")
+
+        if not colegio_id:
+            return qs.none()
+
+        qs = qs.filter(id_persona__id_colegio=colegio_id)
+
+        if persona_id:
+            qs = qs.filter(id_persona=persona_id)
+
+        return qs
+    
 
 class UsuarioPersonaViewSet(viewsets.ModelViewSet):
     queryset = UsuarioPersona.objects.all()

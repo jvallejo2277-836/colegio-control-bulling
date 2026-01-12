@@ -181,3 +181,41 @@ class RolPersonaFullSerializer(serializers.ModelSerializer):
         )
 
         return PersonaInRolSerializer(queryset, many=True).data
+    
+
+class PersonaRelacionReadSerializer(serializers.ModelSerializer):
+    persona_nombre = serializers.SerializerMethodField()
+    persona_rel_nombre = serializers.SerializerMethodField()
+    tipo_relacion_nombre = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PersonaRelacion
+        fields = [
+            "id_persona_relacion",
+            "id_persona",
+            "persona_nombre",
+            "id_persona_rel",
+            "persona_rel_nombre",
+            "id_tipo_relacion",
+            "tipo_relacion_nombre",
+            "prioridad_contacto",
+            "observaciones",
+        ]
+
+    def get_persona_nombre(self, obj):
+        p = obj.id_persona
+        return f"{p.nombres} {p.apellido_paterno or ''} {p.apellido_materno or ''}".strip()
+
+    def get_persona_rel_nombre(self, obj):
+        p = obj.id_persona_rel
+        return f"{p.nombres} {p.apellido_paterno or ''} {p.apellido_materno or ''}".strip()
+
+    def get_tipo_relacion_nombre(self, obj):
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT nombre FROM cat_tipo_relacion WHERE id_tipo_relacion = %s",
+                [obj.id_tipo_relacion],
+            )
+            row = cursor.fetchone()
+        return row[0] if row else None
