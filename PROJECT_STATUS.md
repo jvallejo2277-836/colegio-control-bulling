@@ -189,5 +189,68 @@ No se implementan “mega-testers” mezclando dominios.
   - Incorporado concepto de colegio activo backend-driven.
   - Definido modo compatibilidad para transición sin quiebre.
   - Formalizada regla de entrega por archivos completos.
+- **2026-01-13**
+  - Incorporado marco normativo mínimo y Protocolo Base de Convivencia Escolar (estados, campos obligatorios y reglas de transición).
+
 ###
 ### ✅ DB-first: si una tabla existe en BD pero no hay modelo catálogo en Django, se trabaja con IntegerField(db_column=...) + lookups por join/query, y recién al final se convierte a FK.
+
+
+## 12. Convivencia Escolar – Marco normativo y Protocolo Base (MVP) (DECISIÓN CERRADA)
+
+### 12.1 Objetivo
+Este módulo define el **marco legal mínimo** y el **protocolo base** que gobierna el modelo de “casos” del sistema.
+El sistema **no reemplaza** al Reglamento Interno ni al Equipo de Convivencia: actúa como plataforma de **gestión, trazabilidad y evidencia**.
+
+### 12.2 Marco normativo mínimo (Chile) – Implicancias para el sistema
+Obligatorio (para defensa y cumplimiento):
+- Existencia de **Reglamento Interno** con normas de convivencia y procedimientos.
+- Existencia de **Encargado/a de Convivencia Escolar** (responsable del proceso).
+- Enfoque: **prevención + medidas formativas**, no solo sanción.
+- **Debido proceso**: decisiones fundadas, registro de acciones, proporcionalidad y trazabilidad.
+
+No obligatorio (pero recomendado / valor agregado):
+- Herramienta digital (la ley no obliga software).
+- Métricas avanzadas, scoring, IA, etc. (se dejan como roadmap).
+
+### 12.3 Protocolo Base de Abordaje (Plantilla adaptable por colegio)
+Fases del proceso:
+1) Detección → 2) Evaluación Inicial → 3) Investigación → 4) Resolución → 5) Seguimiento → 6) Cierre
+
+### 12.4 Estados oficiales del CASO (núcleo del modelo)
+Estados (mínimos):
+- CREADO
+- EN_EVALUACION
+- EN_INVESTIGACION
+- RESUELTO
+- EN_SEGUIMIENTO
+- CERRADO
+
+Regla: **RESUELTO ≠ CERRADO** (el cierre exige seguimiento o verificación final).
+
+### 12.5 Campos mínimos obligatorios por caso (MVP)
+- Fecha/hora de creación
+- Origen del reporte (docente / alumno / apoderado / observación / otro)
+- Descripción inicial
+- Personas involucradas (rol en el caso: denunciante / afectado / denunciado / testigo)
+- Estado actual del caso
+- Bitácora de acciones (acción, responsable, fecha/hora, observación)
+- Resolución con fundamento (medidas + responsable + fecha)
+- Fecha de cierre + responsable + observación final
+
+### 12.6 Reglas de transición de estados (Paso 4)
+Principios:
+- No hay “culpables” en CREADO / EN_EVALUACION: solo **registro y evaluación**.
+- Ninguna sanción “automática”: toda medida requiere **fundamento** y responsable.
+- Toda transición debe generar **evento/auditoría** (quién, cuándo, desde/hacia, motivo).
+
+Transiciones mínimas:
+- CREADO → EN_EVALUACION (Encargado Convivencia)
+- EN_EVALUACION → EN_INVESTIGACION (Encargado Convivencia)
+- EN_INVESTIGACION → RESUELTO (Encargado Convivencia / Dirección según reglamento)
+- RESUELTO → EN_SEGUIMIENTO (Encargado Convivencia)
+- EN_SEGUIMIENTO → CERRADO (Encargado Convivencia)
+
+Restricciones:
+- No se permite saltar EN_INVESTIGACION si el caso fue clasificado como violencia/acoso.
+- CERRADO exige: resolución registrada + verificación final (seguimiento o constatación).
