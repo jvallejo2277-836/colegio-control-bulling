@@ -181,6 +181,29 @@ No se implementan “mega-testers” mezclando dominios.
   - evitar omisiones involuntarias
   - asegurar trazabilidad y consistencia del proyecto
 
+
+## 11.1 Regla de oro – Next.js App Router (PREVENCIÓN DE ERRORES)
+
+🧠 Regla de oro para evitar errores en App Router
+
+- Client Component → interactividad
+  - onClick, useState, useEffect, handlers de eventos
+  - debe declarar: "use client"
+  - NO puede exportar metadata
+
+- Server Component → estructura y contexto
+  - metadata
+  - fetch / acceso a datos
+  - layout y composición
+  - es el comportamiento por defecto (sin "use client")
+
+📌 Patrón recomendado cuando se requiere ambos:
+- page.jsx → Server Component (metadata, layout)
+- PageClient.jsx → Client Component (UI interactiva)
+
+Esta regla es obligatoria para mantener estabilidad y evitar errores de build/runtime.
+
+
 ---
 
 ### Changelog
@@ -191,6 +214,16 @@ No se implementan “mega-testers” mezclando dominios.
   - Formalizada regla de entrega por archivos completos.
 - **2026-01-13**
   - Incorporado marco normativo mínimo y Protocolo Base de Convivencia Escolar (estados, campos obligatorios y reglas de transición).
+
+
+	Nota: La persona afectada (víctima) puede ser cualquier integrante de la comunidad educativa
+	(estudiante, docente, asistente, directivo o apoderado), según el tipo de caso.
+
+###  Nota legal: En casos que revistan carácter de delito (por ejemplo abuso sexual, agresión grave,
+     amenazas graves u otros), el establecimiento tiene obligación legal de denunciar a la autoridad
+     competente. El sistema actúa como apoyo de registro y activación del protocolo, y no reemplaza
+     las obligaciones legales ni la investigación penal.
+
 
 ###
 ### ✅ DB-first: si una tabla existe en BD pero no hay modelo catálogo en Django, se trabaja con IntegerField(db_column=...) + lookups por join/query, y recién al final se convierte a FK.
@@ -244,6 +277,17 @@ Principios:
 - Ninguna sanción “automática”: toda medida requiere **fundamento** y responsable.
 - Toda transición debe generar **evento/auditoría** (quién, cuándo, desde/hacia, motivo).
 
+
+
+Para casos con denuncia obligatoria (flag requiere_denuncia = true):
+- Se agrega estado DERIVADO_A_AUTORIDAD.
+- El sistema llega hasta registrar la denuncia (fecha, institución, identificador/parte, responsable y observación).
+- Se exige evidencia adjunta o justificación “sin evidencia”.
+- Se bloquea el cierre (CERRADO) si no existe registro de denuncia.
+Nota: El sistema no verifica la veracidad externa; el responsable final es el funcionario/establecimiento. Todo queda auditado.
+
+
+
 Transiciones mínimas:
 - CREADO → EN_EVALUACION (Encargado Convivencia)
 - EN_EVALUACION → EN_INVESTIGACION (Encargado Convivencia)
@@ -253,4 +297,9 @@ Transiciones mínimas:
 
 Restricciones:
 - No se permite saltar EN_INVESTIGACION si el caso fue clasificado como violencia/acoso.
-- CERRADO exige: resolución registrada + verificación final (seguimiento o constatación).
+- CERRADO exige: resolución registrada + verificación final (seguimiento o constatación)
+
+
+
+
+
