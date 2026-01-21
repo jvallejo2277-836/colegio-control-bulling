@@ -45,12 +45,17 @@ export default function Sidebar() {
       items: [
         {
           name: "Casos de Bullying",
-          path: "/bullying",
+          path: "/convivencia/casos",
           icon: ExclamationTriangleIcon,
         },
         {
+          name: "Reportes",
+          path: "/convivencia/reportes",
+          icon: ClipboardDocumentListIcon,
+        },
+        {
           name: "Intervenciones",
-          path: "/intervenciones",
+          path: "/convivencia/eventos",
           icon: ClipboardDocumentListIcon,
         },
       ],
@@ -101,7 +106,8 @@ export default function Sidebar() {
               key={idx}
               href={item.path}
               className={
-                "sidebar-item " + (pathname.startsWith(item.path) ? "active" : "")
+                "sidebar-item " +
+                (pathname.startsWith(item.path) ? "active" : "")
               }
             >
               <item.icon className="sidebar-icon" />
